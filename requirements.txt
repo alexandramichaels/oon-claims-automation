@@ -1,0 +1,16 @@
+# Out-of-Network Claim Auto-Submitter — Python dependencies
+#
+# Target runtime: Python 3.14 (python.org build). Project venv lives at .venv/
+# (gitignored). Recreate the environment with:
+#
+#   /usr/local/bin/python3 -m venv .venv
+#   .venv/bin/python -m pip install -r requirements.txt
+#   .venv/bin/python -m playwright install chromium
+#
+# The last step downloads the Chromium browser binary (~90 MB) into
+# ~/Library/Caches/ms-playwright/ — it is NOT stored in this repo.
+
+playwright==1.60.0
+playwright-stealth==2.0.3
+pyyaml==6.0.3
+pdfplumber==0.11.4

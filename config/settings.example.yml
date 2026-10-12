@@ -1,0 +1,73 @@
+# Out-of-Network Claim Auto-Submitter — example configuration.
+#
+# Copy this file to config/settings.yml (gitignored) and fill in your own
+# values. Everything below is a placeholder.
+#
+# Secrets (Gmail app password, Cigna login, Jane login, Telegram bot) are NOT
+# here — they live in the macOS Keychain. Retrieve at runtime via:
+#   security find-generic-password -s "oon-claims/<key>" -w
+
+# Do not process superbills or appointments before this date. Set this to the
+# day after the last claim you submitted by hand, so the first run does not
+# try to resubmit old claims. Format: YYYY-MM-DD.
+start_date: "2026-01-01"
+
+# Days after a session with no superbill before a nudge to the provider is drafted.
+missing_superbill_days: 5
+
+gmail:
+  # The weekly run reads Gmail over IMAP (app password in Keychain) — no
+  # Google Cloud / OAuth setup required.
+  address: "you@example.com"
+  keychain_app_password_key: "oon-claims/gmail-app-password"
+  imap_host: "imap.gmail.com"
+
+  # Superbills and appointment reminders both come from Jane.
+  superbill_sender: "notifications@janeapp.com"
+  superbill_subject: "Superbill"
+  # Appointment reminders are the signal for "did this session get billed?"
+  appointment_sender: "notifications@janeapp.com"
+  appointment_subject: "Appointment Reminder"
+
+  # The nudge draft is addressed here and saved to Gmail Drafts for review.
+  provider_email: "provider@example.com"
+  provider_first_name: "Dr. Example"
+  # How the nudge draft is signed.
+  your_first_name: "Your Name"
+  drafts_folder: "[Gmail]/Drafts"
+
+jane:
+  # The "View Superbill" link lands on a Jane page that requires sign-in, so
+  # the tool reuses a saved session for the practice's Jane portal
+  # (created by hand with setup_login.py) to download the PDF.
+  login_url: "https://yourpractice.janeapp.com/"
+  keychain_username_key: "oon-claims/jane-username"
+  keychain_password_key: "oon-claims/jane-password"
+
+cigna:
+  claim_form_url: "https://my.cigna.com/web/secure/consumer/claims/onlinesubmission/form"
+  # On the "Enter payment authorization" step, pick the subscriber rather
+  # than the provider. "subscriber" is the radio's stable value.
+  payee: "subscriber"
+  # Claim name format. {date} is the session date, rendered MM/DD.
+  claim_name_format: "Visit {date}"
+  keychain_username_key: "oon-claims/cigna-username"
+  keychain_password_key: "oon-claims/cigna-password"
+
+telegram:
+  keychain_token_key:   "oon-claims/telegram-token"
+  keychain_chat_id_key: "oon-claims/telegram-chat-id"
+
+playwright:
+  # Cigna may flag headless browsers; run headed by default.
+  headless: false
+  stealth: true
+
+schedule:
+  # Polling fires. Each block becomes one or more launchd StartCalendarInterval
+  # entries merged into a single job. Days use 3-letter names (Mon..Sun);
+  # times are 24-hour HH:MM. After a successful submission, subsequent fires
+  # within the week are cheap IMAP no-ops (orchestrator skips already-processed
+  # superbill emails before booting Playwright).
+  - days: [Mon, Tue, Wed, Thu, Fri]
+    times: ["12:00", "18:00"]

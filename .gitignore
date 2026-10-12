@@ -1,0 +1,26 @@
+# Secrets and credentials live in macOS Keychain, never in the repo.
+.env
+
+# Your real config (names, email addresses, portal URL). Copy from
+# config/settings.example.yml.
+config/settings.yml
+.claude/settings.local.json
+
+# Protected health information — never commit.
+superbills/*
+!superbills/.gitkeep
+sessions/*
+!sessions/.gitkeep
+state.db
+
+# Run logs (may contain email addresses / session dates).
+logs/*
+!logs/.gitkeep
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+.DS_Store
